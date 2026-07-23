@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import type { Collection, GameCharacter, Note } from '@/types/collection';
 import PanelFrame from '@/components/Canvas/PanelFrame';
+import { X } from 'lucide-react';
 
 interface NotesPanelProps {
   collectionId: string;
@@ -46,7 +47,7 @@ export default function NotesPanel({ collectionId }: NotesPanelProps) {
   if (!collection) {
     return (
       <PanelFrame title="Notes" defaultWidth={288}>
-        <p className="text-xs text-neutral-400">Loading…</p>
+        <p className="text-xs text-foreground-muted">Loading…</p>
       </PanelFrame>
     );
   }
@@ -75,39 +76,39 @@ export default function NotesPanel({ collectionId }: NotesPanelProps) {
       title="Notes"
       defaultWidth={288}
       actions={
-        <button type="button" onClick={addNote} className="text-xs text-neutral-400 hover:underline">
+        <button type="button" onClick={addNote} className="text-xs text-foreground-muted hover:underline">
           + Note
         </button>
       }
     >
-      {status && <span className="text-xs text-neutral-400">{status}</span>}
+      {status && <span className="text-xs text-foreground-muted">{status}</span>}
       <div className="space-y-2">
         {notes.map((n) => (
-          <div key={n.id} className="space-y-1 rounded-md border border-neutral-200 p-2 dark:border-neutral-700">
+          <div key={n.id} className="space-y-1 rounded-md border border-border p-2">
             <div className="flex items-center justify-between gap-2">
               <input
                 value={n.title}
                 onChange={(e) => updateNote(n.id, { title: e.target.value })}
                 onBlur={() => persist(notes)}
-                className="flex-1 rounded border border-neutral-300 bg-transparent px-1.5 py-0.5 text-xs font-medium dark:border-neutral-700"
+                className="flex-1 rounded border border-border bg-transparent px-1.5 py-0.5 text-xs font-medium text-foreground"
               />
-              <button type="button" onClick={() => deleteNote(n.id)} className="text-neutral-400 hover:text-red-600">
-                ✕
+              <button type="button" onClick={() => deleteNote(n.id)} className="text-foreground-muted hover:text-danger">
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
             {n.characterId && (
-              <p className="text-[11px] text-neutral-400">Linked: {characterName(n.characterId) ?? 'Unknown character'}</p>
+              <p className="text-[11px] text-foreground-muted">Linked: {characterName(n.characterId) ?? 'Unknown character'}</p>
             )}
             <textarea
               value={n.body}
               onChange={(e) => updateNote(n.id, { body: e.target.value })}
               onBlur={() => persist(notes)}
               rows={2}
-              className="w-full resize-none rounded border border-neutral-300 bg-transparent px-1.5 py-1 text-xs dark:border-neutral-700"
+              className="w-full resize-none rounded border border-border bg-transparent px-1.5 py-1 text-xs text-foreground"
             />
           </div>
         ))}
-        {notes.length === 0 && <p className="text-xs text-neutral-400">No notes yet.</p>}
+        {notes.length === 0 && <p className="text-xs text-foreground-muted">No notes yet.</p>}
       </div>
     </PanelFrame>
   );

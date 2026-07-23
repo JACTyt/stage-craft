@@ -1,0 +1,19 @@
+
+> stage-craft@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by process 4788, using available port 3001 instead.
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://26.21.173.251:3001
+- Environments: .env
+✓ Ready in 472ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          4788
+- Dir:          D:\Repos\Github\stage-craft
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 4788 /F to stop it.
+[?25h

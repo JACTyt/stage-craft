@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Collection, GameCharacter, Note } from '@/types/collection';
+import Button from '@/components/ui/Button';
+import { TextArea } from '@/components/ui/Input';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LorePage() {
   const params = useParams<{ id: string }>();
@@ -45,36 +49,33 @@ export default function LorePage() {
     }
   };
 
-  if (error) return <div className="p-8 text-red-600">{error}</div>;
-  if (!collection) return <div className="p-8 text-neutral-400">Loading…</div>;
+  if (error) return <div className="p-8 text-danger">{error}</div>;
+  if (!collection) return <div className="p-8 text-foreground-muted">Loading…</div>;
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 bg-neutral-100 p-8 dark:bg-neutral-950">
+    <div className="mx-auto flex w-full min-h-screen max-w-7xl flex-col gap-4 bg-background p-8">
       <header className="flex items-center justify-between">
         <div>
-          <Link href={`/collections/${collectionId}`} className="text-xs text-neutral-400 hover:underline">
-            ← {collection.name}
+          <Link href={`/collections/${collectionId}`} className="flex items-center gap-0.5 text-xs text-foreground-muted hover:underline">
+            <ArrowLeft className="h-3 w-3" /> {collection.name}
           </Link>
-          <h1 className="text-2xl font-semibold text-neutral-800 dark:text-neutral-100">Lore</h1>
+          <h1 className="font-display text-2xl font-extrabold uppercase tracking-wide text-foreground">Lore</h1>
         </div>
         <div className="flex items-center gap-2">
-          {status && <span className="text-xs text-neutral-400">{status}</span>}
-          <button
-            type="button"
-            onClick={() => save(collection)}
-            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
+          {status && <span className="text-xs text-foreground-muted">{status}</span>}
+          <Button variant="secondary" onClick={() => save(collection)}>
             Save
-          </button>
+          </Button>
+          <ThemeToggle />
         </div>
       </header>
 
-      <textarea
+      <TextArea
         value={collection.lore}
         onChange={(e) => setCollection({ ...collection, lore: e.target.value })}
         onBlur={() => save(collection)}
         placeholder="World history, factions, locations, timelines — anything the AI Game Master should know about this campaign's world."
-        className="min-h-[60vh] w-full flex-1 resize-none rounded-lg border border-neutral-300 bg-white p-4 text-sm leading-relaxed dark:border-neutral-700 dark:bg-neutral-900"
+        className="min-h-[60vh] w-full flex-1 rounded-lg bg-surface p-4 leading-relaxed"
       />
     </div>
   );

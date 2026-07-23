@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { nanoid } from 'nanoid';
 import type { Collection, GameCharacter, Note } from '@/types/collection';
 import { useSceneStore } from '@/lib/sceneStore';
 import PanelFrame from '@/components/Canvas/PanelFrame';
 import CharacterSheetFields from '@/components/CharacterSheetFields';
+import { ArrowRight, ChevronDown, ChevronRight, X } from 'lucide-react';
 
 interface CharactersPanelProps {
   collectionId: string;
@@ -48,10 +50,19 @@ export default function CharactersPanel({ collectionId }: CharactersPanelProps) 
     }
   };
 
+  const manageLink = (
+    <Link
+      href={`/collections/${collectionId}`}
+      className="flex items-center gap-0.5 text-xs text-foreground-muted hover:underline"
+    >
+      Manage <ArrowRight className="h-3 w-3" />
+    </Link>
+  );
+
   if (!collection) {
     return (
-      <PanelFrame title="Characters" defaultWidth={320}>
-        <p className="text-xs text-neutral-400">Loading…</p>
+      <PanelFrame title="Characters" defaultWidth={320} actions={manageLink}>
+        <p className="text-xs text-foreground-muted">Loading…</p>
       </PanelFrame>
     );
   }
@@ -90,7 +101,7 @@ export default function CharactersPanel({ collectionId }: CharactersPanelProps) 
   const filteredCharacters = filter === 'all' ? characters : characters.filter((c) => c.kind === filter);
 
   return (
-    <PanelFrame title="Characters" defaultWidth={320}>
+    <PanelFrame title="Characters" defaultWidth={320} actions={manageLink}>
       <div className="flex items-center justify-between">
         <div className="flex gap-1 text-xs">
           {(['all', 'pc', 'npc'] as const).map((f) => (
@@ -100,21 +111,22 @@ export default function CharactersPanel({ collectionId }: CharactersPanelProps) 
               onClick={() => setFilter(f)}
               className={`rounded px-1.5 py-0.5 ${
                 filter === f
-                  ? 'bg-neutral-700 text-white'
-                  : 'border border-neutral-300 text-neutral-500 dark:border-neutral-700'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'border border-border text-foreground-muted'
               }`}
             >
               {f.toUpperCase()}
             </button>
           ))}
         </div>
-        {status && <span className="text-xs text-neutral-400">{status}</span>}
+        {status && <span className="text-xs text-foreground-muted">{status}</span>}
       </div>
 
       <button
         type="button"
         onClick={addQuickCharacterToken}
-        className="w-full rounded-md border border-neutral-300 px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+        title="Place a disposable NPC token directly on the canvas — not saved to the roster"
+        className="w-full rounded-md border border-border px-2 py-1 text-xs text-foreground-muted hover:bg-surface-raised"
       >
         + Quick NPC
       </button>
@@ -124,34 +136,62 @@ export default function CharactersPanel({ collectionId }: CharactersPanelProps) 
           const isOpen = expandedId === c.id;
           const characterNotes = notes.filter((n) => n.characterId === c.id);
           return (
-            <div key={c.id} className="rounded-md border border-neutral-200 dark:border-neutral-700">
+            <div key={c.id} className="rounded-md border border-border">
               <button
                 type="button"
+                draggable
+                onDragStart={(e) =>
+                  e.dataTransfer.setData(
+                    'application/json+character',
+                    JSON.stringify({
+                      id: c.id,
+                      name: c.name,
+                      kind: c.kind,
+                      hp: c.hp,
+                      maxHp: c.maxHp,
+                      ac: c.ac,
+                      avatarUrl: c.avatarUrl,
+                    })
+                  )
+                }
                 onClick={() => setExpandedId(isOpen ? null : c.id)}
-                className="flex w-full items-center justify-between p-2 text-left text-xs"
+                title="Click to expand, drag onto the canvas to place this character"
+                className="flex w-full cursor-grab items-center gap-2 p-2 text-left text-xs active:cursor-grabbing"
               >
-                <span>
-                  <span className="font-medium text-neutral-700 dark:text-neutral-200">{c.name}</span>{' '}
-                  <span className="text-neutral-400">
+                <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full border-2 border-accent/50 bg-surface-raised ring-1 ring-border">
+                  {c.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded data URL, not a static asset
+                    <img src={c.avatarUrl} alt={c.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-[9px] font-semibold text-foreground-muted">
+                      {c.name.slice(0, 2).toUpperCase() || '?'}
+                    </span>
+                  )}
+                </span>
+                <span className="flex-1">
+                  <span className="font-medium text-foreground">{c.name}</span>{' '}
+                  <span className="text-foreground-muted">
                     {c.kind.toUpperCase()} · HP {c.hp}/{c.maxHp} · AC {c.ac}
                   </span>
                 </span>
-                <span className="text-neutral-400">{isOpen ? '▾' : '▸'}</span>
+                <span className="text-foreground-muted">
+                  {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                </span>
               </button>
               {isOpen && (
-                <div className="space-y-3 border-t border-neutral-200 p-2 dark:border-neutral-700">
+                <div className="space-y-3 border-t border-border p-2">
                   <CharacterSheetFields
                     character={c}
                     onChange={makeCharacterChange(c.id)}
                     onCommit={makeCharacterCommit(c.id)}
                   />
-                  <div className="space-y-1.5 rounded-md border border-neutral-200 p-2 dark:border-neutral-700">
+                  <div className="space-y-1.5 rounded-md border border-border p-2">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Notes</p>
+                      <p className="text-xs font-medium uppercase tracking-wide text-foreground-muted">Notes</p>
                       <button
                         type="button"
                         onClick={() => addNoteForCharacter(c.id)}
-                        className="text-xs text-neutral-400 hover:underline"
+                        className="text-xs text-foreground-muted hover:underline"
                       >
                         + Note
                       </button>
@@ -163,25 +203,25 @@ export default function CharactersPanel({ collectionId }: CharactersPanelProps) 
                           onChange={(e) => updateNoteBody(n.id, e.target.value)}
                           onBlur={commitNotes}
                           rows={2}
-                          className="w-full resize-none rounded border border-neutral-300 bg-transparent px-1.5 py-1 text-xs dark:border-neutral-700"
+                          className="w-full resize-none rounded border border-border bg-transparent px-1.5 py-1 text-xs text-foreground"
                         />
                         <button
                           type="button"
                           onClick={() => deleteNote(n.id)}
-                          className="text-neutral-400 hover:text-red-600"
+                          className="text-foreground-muted hover:text-danger"
                         >
-                          ✕
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ))}
-                    {characterNotes.length === 0 && <p className="text-xs text-neutral-400">No notes yet.</p>}
+                    {characterNotes.length === 0 && <p className="text-xs text-foreground-muted">No notes yet.</p>}
                   </div>
                 </div>
               )}
             </div>
           );
         })}
-        {filteredCharacters.length === 0 && <p className="text-xs text-neutral-400">No characters yet.</p>}
+        {filteredCharacters.length === 0 && <p className="text-xs text-foreground-muted">No characters yet.</p>}
       </div>
     </PanelFrame>
   );

@@ -31,6 +31,7 @@ export default function ElementRenderer({
   const entry = resolveRegistryEntry(element.registryId, customEntries);
   const visual = entry?.visualBySkin[skin];
   const htmlImage = useHTMLImage(visual?.imageUrl);
+  const avatarImage = useHTMLImage(element.characterSheet?.avatarUrl);
 
   if (!entry || !visual) return null;
 
@@ -72,7 +73,22 @@ export default function ElementRenderer({
       onDragMove={(e) => applySnap(e.target as Konva.Group)}
       onDragEnd={(e) => moveElement(element.id, e.target.x(), e.target.y())}
     >
-      {visual.imageUrl ? (
+      {avatarImage ? (
+        <>
+          <Group
+            clipFunc={(ctx) => {
+              ctx.arc(0, 0, width / 2, 0, Math.PI * 2, false);
+            }}
+          >
+            <KonvaImage image={avatarImage} x={-width / 2} y={-height / 2} width={width} height={height} />
+          </Group>
+          <Circle
+            radius={width / 2}
+            stroke={isSelected ? '#facc15' : visual.stroke}
+            strokeWidth={isSelected ? 3 : 1.5}
+          />
+        </>
+      ) : visual.imageUrl ? (
         <>
           {htmlImage && (
             <KonvaImage

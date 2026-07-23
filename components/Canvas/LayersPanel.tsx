@@ -13,7 +13,7 @@ export default function LayersPanel() {
       <div
         onMouseDown={onMouseDown}
         title="Drag to resize"
-        className="absolute left-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-blue-400/40"
+        className="absolute left-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-accent/30"
       />
       <LayerPanel />
       <Inspector />

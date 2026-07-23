@@ -45,31 +45,31 @@ export default function RulesPanel({ collectionId }: RulesPanelProps) {
   if (!collection) {
     return (
       <PanelFrame title="Rules" defaultWidth={288}>
-        <p className="text-xs text-neutral-400">Loading…</p>
+        <p className="text-xs text-foreground-muted">Loading…</p>
       </PanelFrame>
     );
   }
 
   return (
     <PanelFrame title="Rules" defaultWidth={288}>
-      {status && <span className="text-xs text-neutral-400">{status}</span>}
+      {status && <span className="text-xs text-foreground-muted">{status}</span>}
       <div className="space-y-2">
         {SRD_QUICK_REFERENCE.map((rule) => (
-          <div key={rule.title} className="rounded-md border border-neutral-200 p-2 dark:border-neutral-700">
-            <p className="text-xs font-medium text-neutral-700 dark:text-neutral-200">{rule.title}</p>
-            <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{rule.body}</p>
+          <div key={rule.title} className="rounded-md border border-border p-2">
+            <p className="text-xs font-medium text-foreground">{rule.title}</p>
+            <p className="mt-0.5 text-xs text-foreground-muted">{rule.body}</p>
           </div>
         ))}
       </div>
-      <div className="space-y-1 border-t border-neutral-200 pt-2 dark:border-neutral-700">
-        <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">House rules</p>
+      <div className="space-y-1 border-t border-border pt-2">
+        <p className="text-xs font-medium uppercase tracking-wide text-foreground-muted">House rules</p>
         <textarea
           value={collection.houseRules}
           onChange={(e) => setCollection({ ...collection, houseRules: e.target.value })}
           onBlur={() => persist(collection)}
           rows={4}
           placeholder="Campaign-specific house rules"
-          className="w-full resize-none rounded border border-neutral-300 bg-transparent p-2 text-xs dark:border-neutral-700"
+          className="w-full resize-none rounded border border-border bg-transparent p-2 text-xs text-foreground"
         />
       </div>
     </PanelFrame>

@@ -9,14 +9,17 @@ import Toolbar from '@/components/Canvas/Toolbar';
 import LayersPanel from '@/components/Canvas/LayersPanel';
 import Stage from '@/components/Canvas/Stage';
 import TilesetImportModal from '@/components/Canvas/TilesetImportModal';
+import SceneSettings from '@/components/Canvas/SceneSettings';
 import SaveLoadControls from '@/components/Canvas/SaveLoadControls';
 import GameMasterChat from '@/components/Canvas/GameMasterChat';
-import CharacterRosterPanel from '@/components/Canvas/CharacterRosterPanel';
 import CharactersPanel from '@/components/Canvas/CharactersPanel';
 import NotesPanel from '@/components/Canvas/NotesPanel';
 import LorePanel from '@/components/Canvas/LorePanel';
 import RulesPanel from '@/components/Canvas/RulesPanel';
 import SidePanelRail from '@/components/Canvas/SidePanelRail';
+import Checkbox from '@/components/ui/Checkbox';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { ArrowLeft, Blocks, BookOpen, Layers, ScrollText, Settings, StickyNote, UserCog, Bot } from 'lucide-react';
 
 export default function EditorCanvas() {
   const searchParams = useSearchParams();
@@ -35,13 +38,13 @@ export default function EditorCanvas() {
   const toggleKeepRatio = useSceneStore((s) => s.toggleKeepRatio);
 
   const [elementsOpen, setElementsOpen] = useState(true);
-  const [rosterOpen, setRosterOpen] = useState(true);
-  const [charactersOpen, setCharactersOpen] = useState(false);
+  const [charactersOpen, setCharactersOpen] = useState(true);
   const [notesOpen, setNotesOpen] = useState(false);
   const [loreOpen, setLoreOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(true);
   const [gmOpen, setGmOpen] = useState(true);
+  const [sceneSettingsOpen, setSceneSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (!sceneId) return;
@@ -57,40 +60,40 @@ export default function EditorCanvas() {
   }, [sceneId]);
 
   return (
-    <div className="flex h-screen flex-col gap-3 bg-neutral-100 p-3 dark:bg-neutral-950">
-      <header className="flex items-center justify-between rounded-lg border border-neutral-300 bg-white px-4 py-2 dark:border-neutral-700 dark:bg-neutral-900">
+    <div className="flex h-screen flex-col gap-3 bg-background p-3">
+      <header className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-2">
         <div className="flex items-center gap-2">
           {scene.collectionId && (
             <Link
               href={`/collections/${scene.collectionId}`}
-              className="text-xs text-neutral-400 hover:underline"
+              className="flex items-center gap-0.5 text-xs text-foreground-muted hover:underline"
             >
-              ← Campaign
+              <ArrowLeft className="h-3 w-3" /> Campaign
             </Link>
           )}
           <input
             value={scene.name}
             onChange={(e) => renameScene(e.target.value)}
             title="Scene name"
-            className="rounded border border-transparent bg-transparent px-1 text-lg font-semibold text-neutral-800 hover:border-neutral-300 focus:border-blue-400 focus:outline-none dark:text-neutral-100 dark:hover:border-neutral-700"
+            className="rounded border border-transparent bg-transparent px-1 font-display text-lg font-semibold uppercase tracking-wide text-foreground hover:border-border focus:border-accent focus:outline-none"
           />
         </div>
         <div className="flex items-center gap-4 text-sm">
-          <label className="flex items-center gap-1.5 text-neutral-600 dark:text-neutral-300">
-            <input type="checkbox" checked={snapToSockets} onChange={toggleSnapToSockets} />
+          <label className="flex items-center gap-1.5 text-foreground">
+            <Checkbox checked={snapToSockets} onChange={toggleSnapToSockets} />
             Snap to sockets
           </label>
-          <label className="flex items-center gap-1.5 text-neutral-600 dark:text-neutral-300">
-            <input type="checkbox" checked={snapToGrid} onChange={toggleSnapToGrid} />
+          <label className="flex items-center gap-1.5 text-foreground">
+            <Checkbox checked={snapToGrid} onChange={toggleSnapToGrid} />
             Snap to grid
           </label>
-          <label className="flex items-center gap-1.5 text-neutral-600 dark:text-neutral-300">
-            <input type="checkbox" checked={keepRatio} onChange={toggleKeepRatio} />
+          <label className="flex items-center gap-1.5 text-foreground">
+            <Checkbox checked={keepRatio} onChange={toggleKeepRatio} />
             Keep ratio (resize)
           </label>
           <div className="flex items-center gap-2">
-            <span className="text-neutral-500 dark:text-neutral-400">Theme</span>
-            <div className="flex overflow-hidden rounded-md border border-neutral-300 dark:border-neutral-700">
+            <span className="text-foreground-muted">Theme</span>
+            <div className="flex overflow-hidden rounded-md border border-border">
               {(['fantasy', 'sci-fi', 'custom'] as const).map((theme) => (
                 <button
                   key={theme}
@@ -98,8 +101,8 @@ export default function EditorCanvas() {
                   onClick={() => setActiveTheme(theme)}
                   className={`px-3 py-1 capitalize ${
                     activeTheme === theme
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-transparent text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'bg-transparent text-foreground-muted hover:bg-surface-raised'
                   }`}
                 >
                   {theme}
@@ -108,8 +111,8 @@ export default function EditorCanvas() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-neutral-500 dark:text-neutral-400">Skin</span>
-            <div className="flex overflow-hidden rounded-md border border-neutral-300 dark:border-neutral-700">
+            <span className="text-foreground-muted">Skin</span>
+            <div className="flex overflow-hidden rounded-md border border-border">
               {(['tactical', 'illustrated'] as const).map((skin) => (
                 <button
                   key={skin}
@@ -117,8 +120,8 @@ export default function EditorCanvas() {
                   onClick={() => setActiveSkin(skin)}
                   className={`px-3 py-1 capitalize ${
                     scene.activeSkin === skin
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-transparent text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'bg-transparent text-foreground-muted hover:bg-surface-raised'
                   }`}
                 >
                   {skin}
@@ -128,44 +131,52 @@ export default function EditorCanvas() {
           </div>
           <TilesetImportModal />
           <SaveLoadControls />
+          <ThemeToggle />
         </div>
       </header>
 
       <div className="flex flex-1 gap-3 overflow-hidden">
         <SidePanelRail
           items={[
-            { key: 'elements', label: 'Elements', open: elementsOpen, onToggle: () => setElementsOpen((v) => !v) },
+            { key: 'elements', label: 'Elements', icon: Blocks, open: elementsOpen, onToggle: () => setElementsOpen((v) => !v) },
             ...(scene.collectionId
               ? [
-                  { key: 'roster', label: 'Roster', open: rosterOpen, onToggle: () => setRosterOpen((v) => !v) },
                   {
                     key: 'characters',
                     label: 'Characters',
+                    icon: UserCog,
                     open: charactersOpen,
                     onToggle: () => setCharactersOpen((v) => !v),
                   },
-                  { key: 'notes', label: 'Notes', open: notesOpen, onToggle: () => setNotesOpen((v) => !v) },
-                  { key: 'lore', label: 'Lore', open: loreOpen, onToggle: () => setLoreOpen((v) => !v) },
-                  { key: 'rules', label: 'Rules', open: rulesOpen, onToggle: () => setRulesOpen((v) => !v) },
+                  { key: 'notes', label: 'Notes', icon: StickyNote, open: notesOpen, onToggle: () => setNotesOpen((v) => !v) },
+                  { key: 'lore', label: 'Lore', icon: BookOpen, open: loreOpen, onToggle: () => setLoreOpen((v) => !v) },
+                  { key: 'rules', label: 'Rules', icon: ScrollText, open: rulesOpen, onToggle: () => setRulesOpen((v) => !v) },
                 ]
               : []),
           ]}
         />
         {elementsOpen && <Toolbar />}
-        {scene.collectionId && rosterOpen && <CharacterRosterPanel collectionId={scene.collectionId} />}
         {scene.collectionId && charactersOpen && <CharactersPanel collectionId={scene.collectionId} />}
         {scene.collectionId && notesOpen && <NotesPanel collectionId={scene.collectionId} />}
         {scene.collectionId && loreOpen && <LorePanel collectionId={scene.collectionId} />}
         {scene.collectionId && rulesOpen && <RulesPanel collectionId={scene.collectionId} />}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto rounded-lg bg-surface p-2">
           <Stage />
         </div>
+        {sceneSettingsOpen && <SceneSettings />}
         {layersOpen && <LayersPanel />}
         {gmOpen && <GameMasterChat />}
         <SidePanelRail
           items={[
-            { key: 'layers', label: 'Layers', open: layersOpen, onToggle: () => setLayersOpen((v) => !v) },
-            { key: 'gm', label: 'Game Master', open: gmOpen, onToggle: () => setGmOpen((v) => !v) },
+            {
+              key: 'scene',
+              label: 'Scene',
+              icon: Settings,
+              open: sceneSettingsOpen,
+              onToggle: () => setSceneSettingsOpen((v) => !v),
+            },
+            { key: 'layers', label: 'Layers', icon: Layers, open: layersOpen, onToggle: () => setLayersOpen((v) => !v) },
+            { key: 'gm', label: 'Game Master', icon: Bot, open: gmOpen, onToggle: () => setGmOpen((v) => !v) },
           ]}
         />
       </div>

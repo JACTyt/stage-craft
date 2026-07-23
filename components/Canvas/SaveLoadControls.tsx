@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSceneStore } from '@/lib/sceneStore';
 import type { RegistryEntry, Scene } from '@/types/scene';
+import { X } from 'lucide-react';
 
 interface SceneSummary {
   id: string;
@@ -83,39 +84,39 @@ export default function SaveLoadControls() {
           type="button"
           onClick={handleSave}
           disabled={isBusy}
-          className="rounded-md border border-neutral-300 px-3 py-1 text-sm text-neutral-600 hover:bg-neutral-100 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="rounded-md border border-border px-3 py-1 text-sm text-foreground-muted hover:bg-surface-raised disabled:opacity-50"
         >
           Save
         </button>
         <button
           type="button"
           onClick={openLoad}
-          className="rounded-md border border-neutral-300 px-3 py-1 text-sm text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="rounded-md border border-border px-3 py-1 text-sm text-foreground-muted hover:bg-surface-raised"
         >
           Load
         </button>
-        {status && <span className="text-xs text-neutral-400">{status}</span>}
+        {status && <span className="text-xs text-foreground-muted">{status}</span>}
       </div>
 
       {isLoadOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[70vh] w-full max-w-md flex-col gap-3 overflow-hidden rounded-lg bg-white p-5 dark:bg-neutral-900">
+          <div className="flex max-h-[70vh] w-full max-w-md flex-col gap-3 overflow-hidden rounded-lg bg-surface p-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+              <h2 className="font-display text-lg font-semibold uppercase tracking-wide text-foreground">
                 Load Scene
               </h2>
               <button
                 type="button"
                 onClick={() => setIsLoadOpen(false)}
-                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+                className="text-foreground-muted hover:text-foreground"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-danger">{error}</p>}
             {!error && savedScenes.length === 0 && (
-              <p className="text-sm text-neutral-400">No saved scenes yet.</p>
+              <p className="text-sm text-foreground-muted">No saved scenes yet.</p>
             )}
 
             <ul className="flex-1 space-y-1 overflow-y-auto">
@@ -125,10 +126,10 @@ export default function SaveLoadControls() {
                     type="button"
                     disabled={isBusy}
                     onClick={() => handleLoad(s.id)}
-                    className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm hover:bg-neutral-100 disabled:opacity-50 dark:hover:bg-neutral-800"
+                    className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm hover:bg-surface-raised disabled:opacity-50"
                   >
-                    <span className="text-neutral-700 dark:text-neutral-200">{s.name}</span>
-                    <span className="text-xs text-neutral-400">
+                    <span className="text-foreground">{s.name}</span>
+                    <span className="text-xs text-foreground-muted">
                       {new Date(s.savedAt).toLocaleString()}
                     </span>
                   </button>

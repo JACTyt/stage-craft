@@ -7,6 +7,10 @@ import Link from 'next/link';
 import type { Collection, GameCharacter, Note } from '@/types/collection';
 import { createDefaultScene } from '@/lib/sceneStore';
 import { createBlankCharacter } from '@/lib/dnd5e';
+import Button from '@/components/ui/Button';
+import { TextArea } from '@/components/ui/Input';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { ArrowLeft, ArrowRight, X } from 'lucide-react';
 
 interface SceneSummary {
   id: string;
@@ -27,6 +31,9 @@ export default function CollectionHubPage() {
   const mostRecentlyPlayed = scenes
     .filter((s): s is SceneSummary & { lastPlayedAt: string } => Boolean(s.lastPlayedAt))
     .sort((a, b) => b.lastPlayedAt.localeCompare(a.lastPlayedAt))[0];
+  const mostRecentlyEditedId = scenes.length
+    ? [...scenes].sort((a, b) => b.savedAt.localeCompare(a.savedAt))[0].id
+    : undefined;
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,11 +73,11 @@ export default function CollectionHubPage() {
   };
 
   if (error) {
-    return <div className="p-8 text-red-600">{error}</div>;
+    return <div className="p-8 text-danger">{error}</div>;
   }
 
   if (!collection) {
-    return <div className="p-8 text-neutral-400">Loading…</div>;
+    return <div className="p-8 text-foreground-muted">Loading…</div>;
   }
 
   const handleNewScene = async () => {
@@ -120,192 +127,209 @@ export default function CollectionHubPage() {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 bg-neutral-100 p-8 dark:bg-neutral-950">
+    <div className="mx-auto flex w-full min-h-screen max-w-4xl flex-col gap-6 bg-background p-8">
       <header className="flex items-center justify-between">
         <div>
-          <Link href="/" className="text-xs text-neutral-400 hover:underline">
-            ← All campaigns
+          <Link href="/" className="flex items-center gap-0.5 text-xs text-foreground-muted hover:underline">
+            <ArrowLeft className="h-3 w-3" /> All campaigns
           </Link>
           <input
             value={collection.name}
             onChange={(e) => setCollection({ ...collection, name: e.target.value })}
             onBlur={() => persist(collection, notes, characters)}
-            className="block rounded border border-transparent bg-transparent px-1 text-2xl font-semibold text-neutral-800 hover:border-neutral-300 focus:border-blue-400 focus:outline-none dark:text-neutral-100"
+            className="block rounded border border-transparent bg-transparent px-1 font-display text-2xl font-extrabold uppercase tracking-wide text-foreground hover:border-border focus:border-accent focus:outline-none"
           />
         </div>
         <div className="flex items-center gap-2">
-          {status && <span className="text-xs text-neutral-400">{status}</span>}
-          <button
-            type="button"
-            onClick={() => persist(collection, notes, characters)}
-            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
+          {status && <span className="text-xs text-foreground-muted">{status}</span>}
+          <Button variant="secondary" onClick={() => persist(collection, notes, characters)}>
             Save
-          </button>
+          </Button>
           <Link
             href={`/collections/${collectionId}/lore`}
-            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-sm text-foreground-muted hover:bg-surface-raised"
           >
-            Lore →
+            Lore <ArrowRight className="h-3.5 w-3.5" />
           </Link>
+          <ThemeToggle />
         </div>
       </header>
 
-      <textarea
+      <TextArea
         value={collection.description}
         onChange={(e) => setCollection({ ...collection, description: e.target.value })}
         onBlur={() => persist(collection, notes, characters)}
         placeholder="Campaign description"
         rows={2}
-        className="w-full resize-none rounded-lg border border-neutral-300 bg-white p-3 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+        className="w-full rounded-lg bg-surface p-3"
       />
 
       {mostRecentlyPlayed && (
-        <div className="flex items-center justify-between rounded-lg border border-blue-300 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950">
+        <div className="flex items-center justify-between rounded-lg border border-accent bg-surface-raised p-3">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
+            <p className="text-xs font-medium uppercase tracking-wide text-accent">
               Continue where you left off
             </p>
-            <p className="text-sm text-neutral-700 dark:text-neutral-200">
+            <p className="text-sm text-foreground">
               {mostRecentlyPlayed.name} · last played{' '}
               {new Date(mostRecentlyPlayed.lastPlayedAt).toLocaleString()}
             </p>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="primary"
             onClick={() => router.push(`/editor?scene=${mostRecentlyPlayed.id}`)}
-            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+            className="flex items-center gap-1"
           >
-            Continue →
-          </button>
+            Continue <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
         </div>
       )}
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Scenes</h2>
-          <button
-            type="button"
-            onClick={handleNewScene}
-            className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
+          <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-foreground-muted">Scenes</h2>
+          <Button variant="secondary" onClick={handleNewScene} className="text-xs">
             + New Scene
-          </button>
+          </Button>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {scenes.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => router.push(`/editor?scene=${s.id}`)}
-              className="rounded-lg border border-neutral-300 bg-white p-3 text-left hover:border-blue-400 dark:border-neutral-700 dark:bg-neutral-900"
-            >
-              <p className="text-sm font-medium text-neutral-800 dark:text-neutral-100">{s.name}</p>
-              <p className="text-xs text-neutral-400">{new Date(s.savedAt).toLocaleDateString()}</p>
-            </button>
-          ))}
+          {scenes.map((s) => {
+            const isLastPlayed = s.id === mostRecentlyPlayed?.id;
+            const isLastEdited = s.id === mostRecentlyEditedId;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => router.push(`/editor?scene=${s.id}`)}
+                className={`rounded-lg border p-3 text-left shadow-sm hover:border-accent ${
+                  isLastPlayed ? 'border-accent bg-surface-raised' : 'border-border bg-surface'
+                }`}
+              >
+                <p className="text-sm font-medium text-foreground">{s.name}</p>
+                <p className="text-xs text-foreground-muted">{new Date(s.savedAt).toLocaleDateString()}</p>
+                {(isLastPlayed || isLastEdited) && (
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {isLastPlayed && (
+                      <span className="rounded bg-accent/20 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent">
+                        Last played
+                      </span>
+                    )}
+                    {isLastEdited && (
+                      <span className="rounded bg-surface-raised px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-foreground-muted">
+                        Last edited
+                      </span>
+                    )}
+                  </div>
+                )}
+              </button>
+            );
+          })}
           {scenes.length === 0 && (
-            <p className="col-span-full text-sm text-neutral-400">No scenes yet.</p>
+            <p className="col-span-full text-sm text-foreground-muted">No scenes yet.</p>
           )}
         </div>
       </section>
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+          <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-foreground-muted">
             Characters
           </h2>
-          <button
-            type="button"
-            onClick={addCharacter}
-            className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
+          <Button variant="secondary" onClick={addCharacter} className="text-xs">
             + New Character
-          </button>
+          </Button>
         </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {characters.map((c) => (
             <div
               key={c.id}
-              className="flex items-center justify-between rounded-lg border border-neutral-300 bg-white p-3 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="flex items-center justify-between rounded-lg border border-border bg-surface p-3 text-sm shadow-sm"
             >
-              <Link href={`/collections/${collectionId}/characters/${c.id}`} className="flex-1">
-                <p className="font-medium text-neutral-800 dark:text-neutral-100">{c.name}</p>
-                <p className="text-xs text-neutral-400">
-                  {c.kind.toUpperCase()}
-                  {c.race || c.className ? ` · ${[c.race, c.className].filter(Boolean).join(' ')}` : ''}
-                  {c.level ? ` (Lvl ${c.level})` : ''} · HP {c.hp}/{c.maxHp} · AC {c.ac}
-                </p>
+              <Link href={`/collections/${collectionId}/characters/${c.id}`} className="flex flex-1 items-center gap-2.5">
+                <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full border-2 border-accent/50 bg-surface-raised ring-1 ring-border">
+                  {c.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded data URL, not a static asset
+                    <img src={c.avatarUrl} alt={c.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-xs font-semibold text-foreground-muted">
+                      {c.name.slice(0, 2).toUpperCase() || '?'}
+                    </span>
+                  )}
+                </span>
+                <div>
+                  <p className="font-medium text-foreground">{c.name}</p>
+                  <p className="text-xs text-foreground-muted">
+                    {c.kind.toUpperCase()}
+                    {c.race || c.className ? ` · ${[c.race, c.className].filter(Boolean).join(' ')}` : ''}
+                    {c.level ? ` (Lvl ${c.level})` : ''} · HP {c.hp}/{c.maxHp} · AC {c.ac}
+                  </p>
+                </div>
               </Link>
               <button
                 type="button"
                 onClick={() => deleteCharacter(c.id)}
-                className="ml-2 text-neutral-400 hover:text-red-600"
+                className="ml-2 text-foreground-muted hover:text-danger"
               >
-                ✕
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           ))}
-          {characters.length === 0 && <p className="text-sm text-neutral-400">No characters yet.</p>}
+          {characters.length === 0 && <p className="text-sm text-foreground-muted">No characters yet.</p>}
         </div>
       </section>
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Notes</h2>
-          <button
-            type="button"
-            onClick={addNote}
-            className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
+          <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-foreground-muted">Notes</h2>
+          <Button variant="secondary" onClick={addNote} className="text-xs">
             + New Note
-          </button>
+          </Button>
         </div>
         <div className="space-y-2">
           {notes.map((n) => (
             <div
               key={n.id}
-              className="space-y-1 rounded-lg border border-neutral-300 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="space-y-1 rounded-lg border border-border bg-surface p-2"
             >
               <div className="flex items-center justify-between">
                 <input
                   value={n.title}
                   onChange={(e) => updateNote(n.id, { title: e.target.value })}
                   onBlur={() => persist(collection, notes, characters)}
-                  className="flex-1 rounded border border-neutral-300 bg-transparent px-1.5 py-0.5 text-sm font-medium dark:border-neutral-700"
+                  className="flex-1 rounded border border-border bg-transparent px-1.5 py-0.5 text-sm font-medium text-foreground"
                 />
                 <button
                   type="button"
                   onClick={() => deleteNote(n.id)}
-                  className="ml-2 text-neutral-400 hover:text-red-600"
+                  className="ml-2 text-foreground-muted hover:text-danger"
                 >
-                  ✕
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <textarea
+              <TextArea
                 value={n.body}
                 onChange={(e) => updateNote(n.id, { body: e.target.value })}
                 onBlur={() => persist(collection, notes, characters)}
                 rows={2}
-                className="w-full resize-none rounded border border-neutral-300 bg-transparent px-1.5 py-1 text-sm dark:border-neutral-700"
+                className="w-full text-sm"
               />
             </div>
           ))}
-          {notes.length === 0 && <p className="text-sm text-neutral-400">No notes yet.</p>}
+          {notes.length === 0 && <p className="text-sm text-foreground-muted">No notes yet.</p>}
         </div>
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-foreground-muted">
           Session Memory
         </h2>
-        <textarea
+        <TextArea
           value={collection.sessionMemory}
           onChange={(e) => setCollection({ ...collection, sessionMemory: e.target.value })}
           onBlur={() => persist(collection, notes, characters)}
           placeholder="What happened last session, ongoing plot threads, etc. Fed to the AI Game Master as context."
           rows={4}
-          className="w-full resize-none rounded-lg border border-neutral-300 bg-white p-3 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="w-full rounded-lg bg-surface p-3"
         />
       </section>
     </div>

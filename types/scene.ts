@@ -26,6 +26,8 @@ export interface CharacterSheet {
   maxHp: number;
   ac: number;
   initiative: number;
+  /** Snapshot of the roster character's avatar at drop time (data URL). */
+  avatarUrl?: string;
 }
 
 export interface ElementInstance {
@@ -62,6 +64,11 @@ export interface Scene {
   collectionId?: string;
   activeSkin: Skin;
   gridSize: number;
+  /** Canvas dimensions in pixels. */
+  width: number;
+  height: number;
+  /** Data URL for a custom map background, drawn behind all layers. */
+  backgroundImageUrl?: string;
   layers: Layer[];
   elements: ElementInstance[];
   chatMessages: ChatMessage[];

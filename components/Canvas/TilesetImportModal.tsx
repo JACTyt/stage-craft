@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import type { ElementCategory, RegistryEntry } from '@/types/scene';
 import { useSceneStore } from '@/lib/sceneStore';
+import { X } from 'lucide-react';
 
 const CATEGORIES: ElementCategory[] = [
   'terrain',
@@ -138,16 +139,16 @@ export default function TilesetImportModal() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="rounded-md border border-neutral-300 px-3 py-1 text-sm text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+        className="rounded-md border border-border px-3 py-1 text-sm text-foreground-muted hover:bg-surface-raised"
       >
         Import Tileset
       </button>
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[85vh] w-full max-w-2xl flex-col gap-4 overflow-hidden rounded-lg bg-white p-5 dark:bg-neutral-900">
+          <div className="flex max-h-[85vh] w-full max-w-2xl flex-col gap-4 overflow-hidden rounded-lg bg-surface p-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+              <h2 className="font-display text-lg font-semibold uppercase tracking-wide text-foreground">
                 Import Tileset
               </h2>
               <button
@@ -156,13 +157,13 @@ export default function TilesetImportModal() {
                   setIsOpen(false);
                   reset();
                 }}
-                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+                className="text-foreground-muted hover:text-foreground"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            <p className="text-sm text-foreground-muted">
               Slicing runs on the server: upload a PNG sprite sheet with transparent
               gaps between pieces, or pick one already bundled in{' '}
               <code>public/tilesets</code>. Each connected region of non-transparent
@@ -177,7 +178,7 @@ export default function TilesetImportModal() {
                     key={filename}
                     type="button"
                     onClick={() => handleBundled(filename)}
-                    className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    className="rounded-md border border-border px-2.5 py-1 text-xs text-foreground-muted hover:bg-surface-raised"
                   >
                     {filename}
                   </button>
@@ -192,41 +193,41 @@ export default function TilesetImportModal() {
                 const file = e.target.files?.[0];
                 if (file) handleFile(file);
               }}
-              className="text-sm text-neutral-600 dark:text-neutral-300"
+              className="text-sm text-foreground"
             />
 
             {isProcessing && (
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              <p className="text-sm text-foreground-muted">
                 Slicing tileset…
               </p>
             )}
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-danger">{error}</p>}
 
             {parts.length > 0 && (
               <div className="flex-1 space-y-2 overflow-y-auto">
                 {parts.map((part, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-3 rounded-md border border-neutral-200 p-2 dark:border-neutral-700"
+                    className="flex items-center gap-3 rounded-md border border-border p-2"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL from the slicing API, not a static asset */}
                     <img
                       src={part.slice.dataUrl}
                       alt={part.name}
-                      className="h-10 w-10 shrink-0 rounded border border-neutral-200 object-contain dark:border-neutral-700"
+                      className="h-10 w-10 shrink-0 rounded border border-border object-contain"
                     />
                     <input
                       type="text"
                       value={part.name}
                       onChange={(e) => updatePart(i, { name: e.target.value })}
-                      className="flex-1 rounded border border-neutral-300 bg-transparent px-2 py-1 text-sm dark:border-neutral-700"
+                      className="flex-1 rounded border border-border bg-transparent px-2 py-1 text-sm text-foreground"
                     />
                     <select
                       value={part.category}
                       onChange={(e) =>
                         updatePart(i, { category: e.target.value as ElementCategory })
                       }
-                      className="rounded border border-neutral-300 bg-transparent px-2 py-1 text-sm dark:border-neutral-700"
+                      className="rounded border border-border bg-transparent px-2 py-1 text-sm text-foreground"
                     >
                       {CATEGORIES.map((c) => (
                         <option key={c} value={c}>
@@ -234,7 +235,7 @@ export default function TilesetImportModal() {
                         </option>
                       ))}
                     </select>
-                    <span className="w-16 shrink-0 text-right text-xs text-neutral-400">
+                    <span className="w-16 shrink-0 text-right text-xs text-foreground-muted">
                       {part.slice.width}×{part.slice.height}
                     </span>
                   </div>
@@ -246,7 +247,7 @@ export default function TilesetImportModal() {
               <button
                 type="button"
                 onClick={handleAddAll}
-                className="w-full rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground hover:bg-accent-hover"
               >
                 Add {parts.length} {parts.length === 1 ? 'part' : 'parts'} to Custom theme
               </button>

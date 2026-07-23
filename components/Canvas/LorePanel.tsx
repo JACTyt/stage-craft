@@ -44,20 +44,20 @@ export default function LorePanel({ collectionId }: LorePanelProps) {
   if (!collection) {
     return (
       <PanelFrame title="Lore" defaultWidth={288}>
-        <p className="text-xs text-neutral-400">Loading…</p>
+        <p className="text-xs text-foreground-muted">Loading…</p>
       </PanelFrame>
     );
   }
 
   return (
     <PanelFrame title="Lore" defaultWidth={288}>
-      {status && <span className="text-xs text-neutral-400">{status}</span>}
+      {status && <span className="text-xs text-foreground-muted">{status}</span>}
       <textarea
         value={collection.lore}
         onChange={(e) => setCollection({ ...collection, lore: e.target.value })}
         onBlur={() => persist(collection)}
         rows={14}
-        className="w-full flex-1 resize-none rounded border border-neutral-300 bg-transparent p-2 text-xs dark:border-neutral-700"
+        className="w-full flex-1 resize-none rounded border border-border bg-transparent p-2 text-xs text-foreground"
       />
     </PanelFrame>
   );

@@ -1,16 +1,15 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Layer, Stage as KonvaStage, Transformer } from 'react-konva';
+import { Image as KonvaImage, Layer, Rect, Stage as KonvaStage, Transformer } from 'react-konva';
 import type Konva from 'konva';
 import { useSceneStore } from '@/lib/sceneStore';
 import ElementRenderer from '@/components/Canvas/ElementRenderer';
-
-const STAGE_WIDTH = 1000;
-const STAGE_HEIGHT = 700;
+import { useHTMLImage } from '@/lib/useHTMLImage';
 
 export default function Stage() {
   const scene = useSceneStore((s) => s.scene);
+  const backgroundImage = useHTMLImage(scene.backgroundImageUrl);
   const selectedElementId = useSceneStore((s) => s.selectedElementId);
   const selectElement = useSceneStore((s) => s.selectElement);
   const deleteElement = useSceneStore((s) => s.deleteElement);
@@ -76,18 +75,24 @@ export default function Stage() {
 
   return (
     <div
-      className="inline-block rounded-lg border border-neutral-300 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+      className="inline-block rounded-lg border border-border bg-surface shadow-sm"
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
     >
       <KonvaStage
         ref={stageRef}
-        width={STAGE_WIDTH}
-        height={STAGE_HEIGHT}
+        width={scene.width}
+        height={scene.height}
         onMouseDown={(e) => {
           if (e.target === e.target.getStage()) selectElement(null);
         }}
       >
+        <Layer listening={false}>
+          <Rect x={0} y={0} width={scene.width} height={scene.height} fill="#e5e7eb" />
+          {backgroundImage && (
+            <KonvaImage image={backgroundImage} x={0} y={0} width={scene.width} height={scene.height} />
+          )}
+        </Layer>
         {sortedLayers.map((layer) => (
           <Layer key={layer.id} visible={layer.visible} listening={!layer.locked}>
             {scene.elements

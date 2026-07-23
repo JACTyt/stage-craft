@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { resolveRegistryEntry, useSceneStore } from '@/lib/sceneStore';
+import { Eye, EyeOff, X } from 'lucide-react';
 
 export default function LayerPanel() {
   const layers = useSceneStore((s) => s.scene.layers);
@@ -47,16 +48,16 @@ export default function LayerPanel() {
   };
 
   return (
-    <div className="w-full space-y-2 overflow-y-auto rounded-lg border border-neutral-300 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
+    <div className="w-full space-y-2 overflow-y-auto rounded-lg border border-border bg-surface p-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-foreground-muted">
           Layers
         </h2>
         <button
           type="button"
           onClick={() => addLayer(`Layer ${layers.length + 1}`)}
           title="Add layer"
-          className="rounded border border-neutral-300 px-1.5 text-xs text-neutral-500 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="rounded border border-border px-1.5 text-xs text-foreground-muted hover:bg-surface-raised"
         >
           + Layer
         </button>
@@ -78,7 +79,7 @@ export default function LayerPanel() {
               onDrop={(e) => handleDrop(e, layer.id)}
               className={`rounded-md border ${
                 dragOverLayerId === layer.id
-                  ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/30'
+                  ? 'border-accent bg-accent/10'
                   : 'border-transparent'
               }`}
             >
@@ -86,8 +87,8 @@ export default function LayerPanel() {
                 onClick={() => setActiveLayer(layer.id)}
                 className={`flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm ${
                   layer.id === activeLayerId
-                    ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/40 dark:text-blue-100'
-                    : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                    ? 'bg-accent/20 text-accent'
+                    : 'hover:bg-surface-raised'
                 }`}
               >
                 {editingLayerId === layer.id ? (
@@ -101,7 +102,7 @@ export default function LayerPanel() {
                       if (e.key === 'Enter') commitRename();
                       if (e.key === 'Escape') setEditingLayerId(null);
                     }}
-                    className="w-full rounded border border-blue-400 bg-transparent px-1 text-sm"
+                    className="w-full rounded border border-accent bg-transparent px-1 text-sm text-foreground"
                   />
                 ) : (
                   <span
@@ -123,9 +124,9 @@ export default function LayerPanel() {
                       toggleLayerVisibility(layer.id);
                     }}
                     title={layer.visible ? 'Hide layer' : 'Show layer'}
-                    className="text-xs"
+                    className="text-foreground-muted hover:text-foreground"
                   >
-                    {layer.visible ? '👁' : '🚫'}
+                    {layer.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                   </button>
                   {layers.length > 1 && (
                     <button
@@ -135,9 +136,9 @@ export default function LayerPanel() {
                         deleteLayer(layer.id);
                       }}
                       title="Delete layer"
-                      className="text-xs text-neutral-400 hover:text-red-600"
+                      className="text-foreground-muted hover:text-danger"
                     >
-                      ✕
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </span>
@@ -145,7 +146,7 @@ export default function LayerPanel() {
 
               <ul className="space-y-0.5 px-1 py-1">
                 {layerElements.length === 0 && (
-                  <li className="px-2 py-0.5 text-[11px] text-neutral-400 dark:text-neutral-500">
+                  <li className="px-2 py-0.5 text-[11px] text-foreground-muted">
                     No objects
                   </li>
                 )}
@@ -171,10 +172,10 @@ export default function LayerPanel() {
                       title="Drag to reorder within this layer, or onto another layer to move it there"
                       className={`cursor-grab truncate rounded px-2 py-0.5 text-xs active:cursor-grabbing ${
                         dragOverElementId === el.id
-                          ? 'bg-blue-100 dark:bg-blue-900/50'
+                          ? 'bg-accent/20'
                           : el.id === selectedElementId
-                            ? 'bg-blue-50 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200'
-                            : 'text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                            ? 'bg-accent/10 text-accent'
+                            : 'text-foreground-muted hover:bg-surface-raised'
                       }`}
                     >
                       {label}
@@ -187,7 +188,7 @@ export default function LayerPanel() {
         })}
       </ul>
 
-      <p className="text-[11px] text-neutral-400 dark:text-neutral-500">
+      <p className="text-[11px] text-foreground-muted">
         New elements are placed on the highlighted layer. Drag an object onto another one to reorder
         it (top of list renders in front), or onto another layer to move it there.
       </p>

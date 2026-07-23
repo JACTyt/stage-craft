@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Collection, GameCharacter, Note } from '@/types/collection';
 import CharacterSheetFields from '@/components/CharacterSheetFields';
+import Button from '@/components/ui/Button';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { ArrowLeft } from 'lucide-react';
 
 export default function CharacterSheetPage() {
   const params = useParams<{ id: string; characterId: string }>();
@@ -68,32 +71,41 @@ export default function CharacterSheetPage() {
     }
   };
 
-  if (error) return <div className="p-8 text-red-600">{error}</div>;
-  if (!collection || !character) return <div className="p-8 text-neutral-400">Loading…</div>;
+  if (error) return <div className="p-8 text-danger">{error}</div>;
+  if (!collection || !character) return <div className="p-8 text-foreground-muted">Loading…</div>;
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 bg-neutral-100 p-8 dark:bg-neutral-950">
+    <div className="mx-auto flex w-full min-h-screen max-w-4xl flex-col gap-6 bg-background p-8">
       <header className="flex items-center justify-between">
-        <div>
-          <Link href={`/collections/${collectionId}`} className="text-xs text-neutral-400 hover:underline">
-            ← {collection.name}
-          </Link>
-          <input
-            value={character.name}
-            onChange={(e) => update({ name: e.target.value })}
-            onBlur={save}
-            className="block rounded border border-transparent bg-transparent px-1 text-2xl font-semibold text-neutral-800 hover:border-neutral-300 focus:border-blue-400 focus:outline-none dark:text-neutral-100"
-          />
+        <div className="flex items-center gap-4">
+          <span className="h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-accent/50 bg-surface-raised ring-1 ring-border">
+            {character.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded data URL, not a static asset
+              <img src={character.avatarUrl} alt={character.name} className="h-full w-full object-cover" />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-xl font-semibold text-foreground-muted">
+                {character.name.slice(0, 2).toUpperCase() || '?'}
+              </span>
+            )}
+          </span>
+          <div>
+            <Link href={`/collections/${collectionId}`} className="flex items-center gap-0.5 text-xs text-foreground-muted hover:underline">
+              <ArrowLeft className="h-3 w-3" /> {collection.name}
+            </Link>
+            <input
+              value={character.name}
+              onChange={(e) => update({ name: e.target.value })}
+              onBlur={save}
+              className="block rounded border border-transparent bg-transparent px-1 font-display text-2xl font-extrabold uppercase tracking-wide text-foreground hover:border-border focus:border-accent focus:outline-none"
+            />
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          {status && <span className="text-xs text-neutral-400">{status}</span>}
-          <button
-            type="button"
-            onClick={save}
-            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
+          {status && <span className="text-xs text-foreground-muted">{status}</span>}
+          <Button variant="secondary" onClick={save}>
             Save
-          </button>
+          </Button>
+          <ThemeToggle />
         </div>
       </header>
 

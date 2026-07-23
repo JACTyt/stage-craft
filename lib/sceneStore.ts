@@ -19,6 +19,9 @@ const DEFAULT_LAYERS: Layer[] = [
   { id: 'layer-grid', name: 'Grid / Tokens', visible: true, locked: false, zIndex: 3 },
 ];
 
+export const DEFAULT_SCENE_WIDTH = 1000;
+export const DEFAULT_SCENE_HEIGHT = 700;
+
 export function createDefaultScene(collectionId?: string): Scene {
   return {
     id: nanoid(),
@@ -26,6 +29,8 @@ export function createDefaultScene(collectionId?: string): Scene {
     collectionId,
     activeSkin: 'tactical',
     gridSize: 50,
+    width: DEFAULT_SCENE_WIDTH,
+    height: DEFAULT_SCENE_HEIGHT,
     layers: DEFAULT_LAYERS,
     elements: [],
     chatMessages: [],
@@ -44,7 +49,7 @@ interface SceneStore {
 
   addElement: (registryId: string, position: { x: number; y: number }) => void;
   addElementFromCharacter: (
-    character: { id: string; name: string; kind: 'pc' | 'npc'; hp: number; maxHp: number; ac: number },
+    character: { id: string; name: string; kind: 'pc' | 'npc'; hp: number; maxHp: number; ac: number; avatarUrl?: string },
     position: { x: number; y: number }
   ) => void;
   addQuickCharacterToken: () => void;
@@ -59,6 +64,8 @@ interface SceneStore {
   setElementColor: (id: string, color: string) => void;
 
   renameScene: (name: string) => void;
+  setSceneSize: (width: number, height: number) => void;
+  setBackgroundImage: (url?: string) => void;
   setActiveSkin: (skin: Skin) => void;
   setActiveTheme: (theme: Theme) => void;
   setActiveLayer: (layerId: string) => void;
@@ -144,6 +151,7 @@ export const useSceneStore = create<SceneStore>((set) => ({
           maxHp: character.maxHp,
           ac: character.ac,
           initiative: 0,
+          avatarUrl: character.avatarUrl,
         },
       };
 
@@ -292,6 +300,12 @@ export const useSceneStore = create<SceneStore>((set) => ({
 
   renameScene: (name) => set((state) => ({ scene: { ...state.scene, name } })),
 
+  setSceneSize: (width, height) =>
+    set((state) => ({ scene: { ...state.scene, width, height } })),
+
+  setBackgroundImage: (url) =>
+    set((state) => ({ scene: { ...state.scene, backgroundImageUrl: url } })),
+
   setActiveSkin: (skin) =>
     set((state) => ({ scene: { ...state.scene, activeSkin: skin } })),
 
@@ -374,7 +388,12 @@ export const useSceneStore = create<SceneStore>((set) => ({
 
   replaceScene: (scene, customEntries) =>
     set(() => ({
-      scene: { ...scene, chatMessages: scene.chatMessages ?? [] },
+      scene: {
+        ...scene,
+        chatMessages: scene.chatMessages ?? [],
+        width: scene.width ?? DEFAULT_SCENE_WIDTH,
+        height: scene.height ?? DEFAULT_SCENE_HEIGHT,
+      },
       customEntries,
       selectedElementId: null,
       activeLayerId: scene.layers[0]?.id ?? 'layer-objects',

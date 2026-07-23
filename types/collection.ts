@@ -74,6 +74,8 @@ export interface Spell {
 /** A full D&D 5th edition character sheet — the roster entry for a PC or NPC. */
 export interface GameCharacter {
   id: string;
+  /** Data URL of a 256x256 center-cropped avatar image, or unset for the initials fallback. */
+  avatarUrl?: string;
   name: string;
   kind: 'pc' | 'npc';
   race: string;

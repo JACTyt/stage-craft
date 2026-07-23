@@ -6,6 +6,7 @@ import { useResizableWidth } from '@/lib/useResizableWidth';
 import { executeToolCall } from '@/lib/gm/executeToolCall';
 import type { ChatContentBlock, ChatMessage } from '@/types/scene';
 import type { Collection, GameCharacter } from '@/types/collection';
+import { CornerDownRight, Send, Wrench } from 'lucide-react';
 
 const MAX_TOOL_ROUNDS = 8;
 
@@ -196,22 +197,22 @@ export default function GameMasterChat() {
 
   return (
     <div
-      className="relative flex shrink-0 flex-col rounded-lg border border-neutral-300 bg-white dark:border-neutral-700 dark:bg-neutral-900"
+      className="relative flex shrink-0 flex-col rounded-lg border border-border bg-surface"
       style={{ width }}
     >
       <div
         onMouseDown={onMouseDown}
         title="Drag to resize"
-        className="absolute left-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-blue-400/40"
+        className="absolute left-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-accent/30"
       />
-      <div className="flex items-center justify-between border-b border-neutral-200 px-3 py-2 dark:border-neutral-700">
-        <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-foreground-muted">
           Game Master
         </h2>
         <button
           type="button"
           onClick={clearChat}
-          className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+          className="text-xs text-foreground-muted hover:text-foreground"
         >
           Clear
         </button>
@@ -219,7 +220,7 @@ export default function GameMasterChat() {
 
       <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto px-3 py-2 text-sm">
         {chatMessages.length === 0 && (
-          <p className="text-xs text-neutral-400 dark:text-neutral-500">
+          <p className="text-xs text-foreground-muted">
             Talk to the AI Game Master. It can narrate, roll dice, and edit the scene directly
             (add/move tokens and terrain, track HP and initiative). Type /start_session or
             /end_session to bookend a play session.
@@ -228,11 +229,11 @@ export default function GameMasterChat() {
         {chatMessages.map((message, i) => (
           <ChatMessageView key={i} message={message} />
         ))}
-        {isLoading && <p className="text-xs italic text-neutral-400">Thinking…</p>}
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        {isLoading && <p className="text-xs italic text-foreground-muted">Thinking…</p>}
+        {error && <p className="text-xs text-danger">{error}</p>}
       </div>
 
-      <div className="flex items-end gap-2 border-t border-neutral-200 p-2 dark:border-neutral-700">
+      <div className="flex items-stretch gap-2 border-t border-border p-2">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -244,15 +245,15 @@ export default function GameMasterChat() {
           }}
           rows={2}
           placeholder="Say something to the GM…"
-          className="flex-1 resize-none rounded border border-neutral-300 bg-transparent px-2 py-1 text-sm dark:border-neutral-700"
+          className="flex-1 resize-none rounded border border-border bg-transparent px-2 py-1 text-sm text-foreground"
         />
         <button
           type="button"
           onClick={sendMessage}
           disabled={isLoading || !input.trim()}
-          className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="flex items-center justify-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:bg-accent-hover disabled:opacity-50"
         >
-          Send
+          Send <Send className="h-3.5 w-3.5" />
         </button>
       </div>
     </div>
@@ -262,7 +263,7 @@ export default function GameMasterChat() {
 function ChatMessageView({ message }: { message: ChatMessage }) {
   if (typeof message.content === 'string') {
     return (
-      <div className="ml-auto max-w-[85%] rounded-lg bg-blue-600 px-2.5 py-1.5 text-white">
+      <div className="ml-auto max-w-[85%] rounded-lg bg-accent px-2.5 py-1.5 text-accent-foreground">
         {message.content}
       </div>
     );
@@ -275,7 +276,7 @@ function ChatMessageView({ message }: { message: ChatMessage }) {
           return (
             <div
               key={i}
-              className="max-w-[90%] rounded-lg bg-neutral-100 px-2.5 py-1.5 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-100"
+              className="max-w-[90%] rounded-lg bg-surface-raised px-2.5 py-1.5 text-foreground"
             >
               {block.text}
             </div>
@@ -283,15 +284,15 @@ function ChatMessageView({ message }: { message: ChatMessage }) {
         }
         if (block.type === 'tool_use') {
           return (
-            <div key={i} className="text-[11px] text-neutral-400 dark:text-neutral-500">
-              🔧 {block.name}({JSON.stringify(block.input)})
+            <div key={i} className="flex items-center gap-1 text-[11px] text-foreground-muted">
+              <Wrench className="h-3 w-3 shrink-0" /> {block.name}({JSON.stringify(block.input)})
             </div>
           );
         }
         if (block.type === 'tool_result') {
           return (
-            <div key={i} className="text-[11px] text-neutral-400 dark:text-neutral-500">
-              ↳ {block.content}
+            <div key={i} className="flex items-center gap-1 text-[11px] text-foreground-muted">
+              <CornerDownRight className="h-3 w-3 shrink-0" /> {block.content}
             </div>
           );
         }

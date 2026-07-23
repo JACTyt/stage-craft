@@ -30,13 +30,13 @@ export default function Toolbar() {
   return (
     <PanelFrame title="Elements">
       {!hasEntries && (
-        <p className="text-xs text-neutral-400 dark:text-neutral-500">
+        <p className="text-xs text-foreground-muted">
           No elements in this theme yet. Import a tileset to add some.
         </p>
       )}
       {Object.entries(entriesByCategory).map(([category, entries]) => (
         <div key={category}>
-          <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
+          <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wide text-foreground-muted">
             {CATEGORY_LABELS[category] ?? category}
           </h3>
           <div className="grid grid-cols-2 gap-1.5">
@@ -48,7 +48,7 @@ export default function Toolbar() {
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData('text/registry-id', entry.id)}
                   title={`Drag onto the canvas to place ${visual.label}`}
-                  className="flex cursor-grab flex-col items-center gap-1 rounded-md border border-neutral-200 p-1.5 text-center active:cursor-grabbing dark:border-neutral-700"
+                  className="flex cursor-grab flex-col items-center gap-1 rounded-md border border-border p-1.5 text-center hover:bg-surface-raised active:cursor-grabbing"
                 >
                   {visual.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded data URL, not a static asset
@@ -78,7 +78,7 @@ export default function Toolbar() {
                         if (e.key === 'Escape') setEditingId(null);
                       }}
                       onClick={(e) => e.stopPropagation()}
-                      className="w-full rounded border border-blue-400 bg-transparent px-1 text-center text-[11px] leading-tight text-neutral-600 dark:text-neutral-300"
+                      className="w-full rounded border border-accent bg-transparent px-1 text-center text-[11px] leading-tight text-foreground"
                     />
                   ) : (
                     <span
@@ -88,7 +88,7 @@ export default function Toolbar() {
                         setEditingValue(visual.label);
                       }}
                       title={entry.theme === 'custom' ? 'Double-click to rename' : undefined}
-                      className="text-[11px] leading-tight text-neutral-600 dark:text-neutral-300"
+                      className="text-[11px] leading-tight text-foreground"
                     >
                       {visual.label}
                     </span>
