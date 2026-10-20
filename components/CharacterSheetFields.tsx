@@ -18,6 +18,7 @@ import {
 import { cropImageToSquareDataUrl } from '@/lib/imageUtils';
 import Button from '@/components/ui/Button';
 import Checkbox from '@/components/ui/Checkbox';
+import { Select } from '@/components/ui/Input';
 import { X } from 'lucide-react';
 
 interface CharacterSheetFieldsProps {
@@ -110,14 +111,14 @@ export default function CharacterSheetFields({ character, onChange, onCommit }: 
         <div className="grid flex-1 grid-cols-2 gap-3 @3xl:grid-cols-4">
           <label className="space-y-1">
             <span className={labelCls}>Kind</span>
-            <select
+            <Select
               value={character.kind}
               onChange={(e) => onCommit({ kind: e.target.value as 'pc' | 'npc' })}
-              className={`${inputCls} w-full`}
+              className="w-full"
             >
               <option value="pc">PC</option>
               <option value="npc">NPC</option>
-            </select>
+            </Select>
           </label>
           <label className="space-y-1">
             <span className={labelCls}>Race</span>

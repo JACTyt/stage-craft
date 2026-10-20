@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import type { RegistryEntry, Scene } from '@/types/scene';
+import { nanoid } from 'nanoid';
+import type { ElementInstance, RegistryEntry, Scene } from '@/types/scene';
 import { isValidId } from '@/lib/server/idValidation';
 
 const SCENES_DIR = path.join(process.cwd(), 'data', 'scenes');
@@ -38,6 +39,47 @@ export async function saveScene(scene: Scene, customEntries: RegistryEntry[]): P
   const payload: SavedScenePayload = { scene, customEntries, savedAt: new Date().toISOString() };
   await writeFile(fileFor(scene.id), JSON.stringify(payload, null, 2), 'utf8');
   return payload;
+}
+
+export interface DuplicateSceneOptions {
+  /** Overrides the scene's collectionId in the copy. Defaults to the source scene's collectionId. */
+  collectionId?: string;
+  /** Appends " (Copy)" to the scene name. Defaults to true. */
+  renameWithCopySuffix?: boolean;
+  /** Remaps token characterId references (old id -> new id) when the roster itself was duplicated too. */
+  characterIdMap?: Record<string, string>;
+}
+
+/** Loads a scene and saves it back under a new id, optionally moved to a different collection and with its tokens' characterId links remapped. */
+export async function duplicateScene(
+  id: string,
+  options: DuplicateSceneOptions = {}
+): Promise<SavedScenePayload | null> {
+  const existing = await loadScene(id);
+  if (!existing) return null;
+
+  const { collectionId, renameWithCopySuffix = true, characterIdMap } = options;
+
+  const elements: ElementInstance[] = existing.scene.elements.map((el) => {
+    if (!el.characterId) return { ...el, id: nanoid() };
+    const mappedCharacterId = characterIdMap ? characterIdMap[el.characterId] : el.characterId;
+    if (!mappedCharacterId) {
+      const clone: ElementInstance = { ...el, id: nanoid() };
+      delete clone.characterId;
+      return clone;
+    }
+    return { ...el, id: nanoid(), characterId: mappedCharacterId };
+  });
+
+  const scene: Scene = {
+    ...existing.scene,
+    id: nanoid(),
+    name: renameWithCopySuffix ? `${existing.scene.name} (Copy)` : existing.scene.name,
+    collectionId: collectionId ?? existing.scene.collectionId,
+    elements,
+  };
+
+  return saveScene(scene, existing.customEntries);
 }
 
 export async function markScenePlayed(id: string): Promise<SavedScenePayload | null> {

@@ -10,7 +10,7 @@ export default function Checkbox({ className = '', ...props }: CheckboxProps) {
     <span className={`relative inline-flex h-4 w-4 shrink-0 ${className}`}>
       <input
         type="checkbox"
-        className="peer h-4 w-4 shrink-0 cursor-pointer appearance-none rounded border border-border bg-transparent transition-colors checked:border-accent checked:bg-accent"
+        className="peer h-4 w-4 shrink-0 cursor-pointer appearance-none rounded border-2 border-border bg-surface-raised transition-colors hover:border-accent checked:border-accent checked:bg-accent"
         {...props}
       />
       <Check

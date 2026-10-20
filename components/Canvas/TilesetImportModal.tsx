@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import type { ElementCategory, RegistryEntry } from '@/types/scene';
 import { useSceneStore } from '@/lib/sceneStore';
+import { Select } from '@/components/ui/Input';
 import { X } from 'lucide-react';
 
 const CATEGORIES: ElementCategory[] = [
@@ -222,19 +223,18 @@ export default function TilesetImportModal() {
                       onChange={(e) => updatePart(i, { name: e.target.value })}
                       className="flex-1 rounded border border-border bg-transparent px-2 py-1 text-sm text-foreground"
                     />
-                    <select
+                    <Select
                       value={part.category}
                       onChange={(e) =>
                         updatePart(i, { category: e.target.value as ElementCategory })
                       }
-                      className="rounded border border-border bg-transparent px-2 py-1 text-sm text-foreground"
                     >
                       {CATEGORIES.map((c) => (
                         <option key={c} value={c}>
                           {c}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                     <span className="w-16 shrink-0 text-right text-xs text-foreground-muted">
                       {part.slice.width}×{part.slice.height}
                     </span>

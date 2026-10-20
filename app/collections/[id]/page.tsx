@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { nanoid } from 'nanoid';
 import Link from 'next/link';
@@ -10,7 +10,7 @@ import { createBlankCharacter } from '@/lib/dnd5e';
 import Button from '@/components/ui/Button';
 import { TextArea } from '@/components/ui/Input';
 import ThemeToggle from '@/components/ui/ThemeToggle';
-import { ArrowLeft, ArrowRight, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Copy, X } from 'lucide-react';
 
 interface SceneSummary {
   id: string;
@@ -37,6 +37,13 @@ export default function CollectionHubPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const loadScenes = () => {
+    fetch(`/api/scenes?collectionId=${collectionId}`)
+      .then((res) => res.json())
+      .then((data) => setScenes(data.scenes ?? []))
+      .catch(() => {});
+  };
+
   useEffect(() => {
     fetch(`/api/collections/${collectionId}`)
       .then((res) => res.json())
@@ -51,10 +58,8 @@ export default function CollectionHubPage() {
       })
       .catch(() => setError('Could not reach the collections API.'));
 
-    fetch(`/api/scenes?collectionId=${collectionId}`)
-      .then((res) => res.json())
-      .then((data) => setScenes(data.scenes ?? []))
-      .catch(() => {});
+    loadScenes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId]);
 
   const persist = async (nextCollection: Collection, nextNotes: Note[], nextCharacters: GameCharacter[]) => {
@@ -94,6 +99,16 @@ export default function CollectionHubPage() {
     router.push(`/editor?scene=${scene.id}`);
   };
 
+  const handleDuplicateScene = async (sceneId: string, event: MouseEvent) => {
+    event.stopPropagation();
+    const res = await fetch(`/api/scenes/${sceneId}/duplicate`, { method: 'POST' });
+    if (!res.ok) {
+      setError('Could not duplicate the scene.');
+      return;
+    }
+    loadScenes();
+  };
+
   const addNote = () => {
     const note: Note = { id: nanoid(), title: 'New note', body: '', updatedAt: new Date().toISOString() };
     const next = [...notes, note];
@@ -122,6 +137,15 @@ export default function CollectionHubPage() {
 
   const deleteCharacter = (id: string) => {
     const next = characters.filter((c) => c.id !== id);
+    setCharacters(next);
+    persist(collection, notes, next);
+  };
+
+  const duplicateCharacter = (id: string) => {
+    const source = characters.find((c) => c.id === id);
+    if (!source) return;
+    const copy = { ...source, id: nanoid(), name: `${source.name} (Copy)` };
+    const next = [...characters, copy];
     setCharacters(next);
     persist(collection, notes, next);
   };
@@ -201,11 +225,20 @@ export default function CollectionHubPage() {
                 key={s.id}
                 type="button"
                 onClick={() => router.push(`/editor?scene=${s.id}`)}
-                className={`rounded-lg border p-3 text-left shadow-sm hover:border-accent ${
+                className={`relative rounded-lg border p-3 text-left shadow-sm hover:border-accent ${
                   isLastPlayed ? 'border-accent bg-surface-raised' : 'border-border bg-surface'
                 }`}
               >
-                <p className="text-sm font-medium text-foreground">{s.name}</p>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => handleDuplicateScene(s.id, e)}
+                  title="Duplicate scene"
+                  className="absolute right-1.5 top-1.5 rounded p-1 text-foreground-muted hover:bg-surface-raised hover:text-foreground"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </span>
+                <p className="pr-5 text-sm font-medium text-foreground">{s.name}</p>
                 <p className="text-xs text-foreground-muted">{new Date(s.savedAt).toLocaleDateString()}</p>
                 {(isLastPlayed || isLastEdited) && (
                   <div className="mt-1.5 flex flex-wrap gap-1">
@@ -265,6 +298,14 @@ export default function CollectionHubPage() {
                   </p>
                 </div>
               </Link>
+              <button
+                type="button"
+                onClick={() => duplicateCharacter(c.id)}
+                title="Duplicate character"
+                className="ml-2 text-foreground-muted hover:text-foreground"
+              >
+                <Copy className="h-3.5 w-3.5" />
+              </button>
               <button
                 type="button"
                 onClick={() => deleteCharacter(c.id)}

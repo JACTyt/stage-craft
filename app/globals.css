@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   --background: #eef1ee;
   --surface: #ffffff;
   --surface-raised: #f2f4f2;
@@ -16,6 +17,7 @@
 }
 
 :root[data-theme='dark'] {
+  color-scheme: dark;
   --background: #14181a;
   --surface: #1b2124;
   --surface-raised: #232a2e;
@@ -99,4 +101,12 @@ input[type='number'] {
 input[type='checkbox'],
 input[type='radio'] {
   accent-color: var(--accent);
+}
+
+/* Explicit colors for <option> rows — color-scheme alone isn't enough to theme the native
+   <select> popup in every browser, so unselected options can render on the OS's light-mode
+   popup background regardless of the page's dark theme. */
+select option {
+  background-color: var(--surface-raised);
+  color: var(--foreground);
 }

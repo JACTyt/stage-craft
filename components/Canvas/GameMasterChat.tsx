@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useSceneStore } from '@/lib/sceneStore';
 import { useResizableWidth } from '@/lib/useResizableWidth';
 import { executeToolCall } from '@/lib/gm/executeToolCall';
+import { GM_COMMANDS } from '@/lib/gm/commands';
+import { apiKeyForProvider, getGmSettings } from '@/lib/gm/settings';
 import type { ChatContentBlock, ChatMessage } from '@/types/scene';
 import type { Collection, GameCharacter } from '@/types/collection';
 import { CornerDownRight, Send, Wrench } from 'lucide-react';
@@ -11,10 +13,18 @@ import { CornerDownRight, Send, Wrench } from 'lucide-react';
 const MAX_TOOL_ROUNDS = 8;
 
 async function callGmApi(messages: ChatMessage[], campaignContext: string): Promise<ChatMessage> {
+  const settings = getGmSettings();
   const res = await fetch('/api/gm/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, campaignContext }),
+    body: JSON.stringify({
+      messages,
+      campaignContext,
+      provider: settings.provider,
+      model: settings.model,
+      apiKey: apiKeyForProvider(settings),
+      additionalInstructions: settings.additionalInstructions,
+    }),
   });
   const data = await res.json();
   if (!res.ok) {
@@ -98,6 +108,13 @@ export default function GameMasterChat() {
   const [fetchedContext, setFetchedContext] = useState('');
   const campaignContext = collectionId ? fetchedContext : '';
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const trimmedInput = input.trim().toLowerCase();
+  const isCommandMatch = GM_COMMANDS.some((c) => c.command === trimmedInput);
+  const commandSuggestions =
+    trimmedInput.startsWith('/') && !isCommandMatch
+      ? GM_COMMANDS.filter((c) => c.command.startsWith(trimmedInput))
+      : [];
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -233,28 +250,47 @@ export default function GameMasterChat() {
         {error && <p className="text-xs text-danger">{error}</p>}
       </div>
 
-      <div className="flex items-stretch gap-2 border-t border-border p-2">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              sendMessage();
-            }
-          }}
-          rows={2}
-          placeholder="Say something to the GM…"
-          className="flex-1 resize-none rounded border border-border bg-transparent px-2 py-1 text-sm text-foreground"
-        />
-        <button
-          type="button"
-          onClick={sendMessage}
-          disabled={isLoading || !input.trim()}
-          className="flex items-center justify-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:bg-accent-hover disabled:opacity-50"
-        >
-          Send <Send className="h-3.5 w-3.5" />
-        </button>
+      <div className="relative border-t border-border p-2">
+        {commandSuggestions.length > 0 && (
+          <div className="absolute bottom-full left-2 right-2 mb-1 space-y-0.5 rounded-md border border-border bg-surface-raised p-1.5 shadow-lg">
+            {commandSuggestions.map((c) => (
+              <button
+                key={c.command}
+                type="button"
+                onClick={() => setInput(c.command)}
+                className="block w-full rounded px-2 py-1 text-left text-xs hover:bg-surface"
+              >
+                <span className="font-mono font-medium text-accent">{c.command}</span>
+                <span className="ml-2 text-foreground-muted">{c.description}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="flex items-stretch gap-2">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            rows={2}
+            placeholder="Say something to the GM…"
+            className={`flex-1 resize-none rounded border px-2 py-1 text-sm text-foreground ${
+              isCommandMatch ? 'border-accent bg-accent/10' : 'border-border bg-transparent'
+            }`}
+          />
+          <button
+            type="button"
+            onClick={sendMessage}
+            disabled={isLoading || !input.trim()}
+            className="flex items-center justify-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:bg-accent-hover disabled:opacity-50"
+          >
+            Send <Send className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );
